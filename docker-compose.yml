@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: dynamiccomfy-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/shared_models:/app/data/shared_models
+      - ./data/users:/app/data/users
+    environment:
+      - APP_ENV=dev
+      - DATABASE_URL=sqlite+aiosqlite:////app/backend/dynamiccomfy.db
+      - JWT_SECRET=change-me-in-production
+      - COMFY_BASE_IMAGE=comfyui-base-image:latest
+      - SERVER_PUBLIC_HOST=127.0.0.1
+      - AUTO_KILL_MAX_SECONDS=3600
+      - AUTO_KILL_INTERVAL_SECONDS=600
+      - PORT_RANGE_START=8101
+      - PORT_RANGE_END=8199
+      - SHARED_MODELS_DIR=/app/data/shared_models
+      - USERS_DATA_DIR=/app/data/users
+    restart: unless-stopped
