@@ -12,8 +12,11 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60 * 24
 
     comfy_base_image: str = "ghcr.io/ai-dock/comfyui:latest"
+    comfy_internal_port: int = 8188
+    comfy_container_models_dir: str = "/opt/ComfyUI/models"
+    comfy_container_output_dir: str = "/opt/ComfyUI/output"
     server_public_host: str = "127.0.0.1"
-    enable_gpu: bool = True
+    enable_gpu: bool = False
 
     auto_kill_max_seconds: int = 3600
     auto_kill_interval_seconds: int = 600

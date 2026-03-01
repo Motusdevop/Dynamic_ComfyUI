@@ -22,7 +22,7 @@ async def start_instance(
     status, _, _, _ = await manager.status_for_user(user)
     return InstanceControlOut(
         message="Instance ready" if status == "running" else "Instance unavailable",
-        status="running",
+        status=status,
         port=result.port,
         container_id=result.container_id,
         workspace_url=result.workspace_url,

@@ -4,23 +4,35 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: dynamiccomfy-api
+    env_file:
+      - .env
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     volumes:
-      - ./backend:/app/backend
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/shared_models:/app/data/shared_models
-      - ./data/users:/app/data/users
+      - ./data:/app/data
     environment:
-      - APP_ENV=dev
-      - DATABASE_URL=sqlite+aiosqlite:////app/backend/dynamiccomfy.db
-      - JWT_SECRET=change-me-in-production
-      - COMFY_BASE_IMAGE=ghcr.io/ai-dock/comfyui:latest-gpu
-      - SERVER_PUBLIC_HOST=127.0.0.1
-      - AUTO_KILL_MAX_SECONDS=3600
-      - AUTO_KILL_INTERVAL_SECONDS=600
-      - PORT_RANGE_START=8101
-      - PORT_RANGE_END=8199
-      - SHARED_MODELS_DIR=${PWD}/data/shared_models
-      - USERS_DATA_DIR=${PWD}/data/users
+      - APP_ENV=${APP_ENV:-prod}
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:////app/data/dynamiccomfy.db}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES:-1440}
+      - COMFY_BASE_IMAGE=${COMFY_BASE_IMAGE:-dynamiccomfy/comfyui:cuda12.1}
+      - COMFY_INTERNAL_PORT=${COMFY_INTERNAL_PORT:-8188}
+      - COMFY_CONTAINER_MODELS_DIR=${COMFY_CONTAINER_MODELS_DIR:-/opt/ComfyUI/models}
+      - COMFY_CONTAINER_OUTPUT_DIR=${COMFY_CONTAINER_OUTPUT_DIR:-/opt/ComfyUI/output}
+      - ENABLE_GPU=${ENABLE_GPU:-false}
+      - SERVER_PUBLIC_HOST=${SERVER_PUBLIC_HOST}
+      - AUTO_KILL_MAX_SECONDS=${AUTO_KILL_MAX_SECONDS:-3600}
+      - AUTO_KILL_INTERVAL_SECONDS=${AUTO_KILL_INTERVAL_SECONDS:-600}
+      - PORT_RANGE_START=${PORT_RANGE_START:-8101}
+      - PORT_RANGE_END=${PORT_RANGE_END:-8199}
+      - SHARED_MODELS_DIR=${PROJECT_ROOT}/data/shared_models
+      - USERS_DATA_DIR=${PROJECT_ROOT}/data/users
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped

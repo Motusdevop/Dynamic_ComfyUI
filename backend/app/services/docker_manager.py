@@ -3,7 +3,7 @@ from pathlib import Path
 import socket
 
 import docker
-from docker.errors import ImageNotFound, NotFound
+from docker.errors import APIError, DockerException, ImageNotFound, NotFound
 from docker.models.containers import Container
 from docker.types import DeviceRequest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,9 +29,10 @@ class DockerManager:
 
     def _find_free_port(self) -> int:
         active_ports = set()
+        container_port_key = f"{self.settings.comfy_internal_port}/tcp"
         for container in self.client.containers.list():
             ports = container.attrs.get("NetworkSettings", {}).get("Ports", {})
-            bindings = ports.get("8188/tcp") or []
+            bindings = ports.get(container_port_key) or []
             if not bindings:
                 continue
             host_port = bindings[0].get("HostPort")
@@ -67,11 +68,17 @@ class DockerManager:
             return self.client.containers.run(
                 image=self.settings.comfy_base_image,
                 detach=True,
-                ports={"8188/tcp": port},
+                ports={f"{self.settings.comfy_internal_port}/tcp": port},
                 device_requests=device_requests,
                 volumes={
-                    str(self.settings.shared_models_path): {"bind": "/opt/comfyui/models", "mode": "ro"},
-                    str(user_output): {"bind": "/opt/comfyui/output", "mode": "rw"},
+                    str(self.settings.shared_models_path): {
+                        "bind": self.settings.comfy_container_models_dir,
+                        "mode": "ro",
+                    },
+                    str(user_output): {
+                        "bind": self.settings.comfy_container_output_dir,
+                        "mode": "rw",
+                    },
                 },
                 labels={"dynamiccomfy.user_id": str(user_id)},
                 name=f"dynamiccomfy-u{user_id}-p{port}",
@@ -81,6 +88,15 @@ class DockerManager:
             raise RuntimeError(
                 f"Base image '{image}' was not found. Build or pull it first, or update COMFY_BASE_IMAGE."
             ) from exc
+        except APIError as exc:
+            details = str(exc)
+            if self.settings.enable_gpu:
+                details = (
+                    f"{details}. If this host has no NVIDIA runtime, set ENABLE_GPU=false."
+                )
+            raise RuntimeError(f"Failed to start container: {details}") from exc
+        except DockerException as exc:
+            raise RuntimeError(f"Docker connection error: {exc}") from exc
 
     async def start_for_user(self, user: User) -> StartResult:
         existing = await self.instances.get_running_by_user(user.id)
