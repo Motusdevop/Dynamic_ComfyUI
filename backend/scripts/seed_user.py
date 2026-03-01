@@ -23,3 +23,5 @@ if __name__ == "__main__":
         print("Usage: python -m scripts.seed_user <username> <password>")
         raise SystemExit(1)
     asyncio.run(main(sys.argv[1], sys.argv[2]))
+
+# docker compose run --rm api uv run python -m scripts.seed_user testuser testpass123

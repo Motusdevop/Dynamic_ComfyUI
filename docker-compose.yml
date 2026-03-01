@@ -15,12 +15,12 @@ services:
       - APP_ENV=dev
       - DATABASE_URL=sqlite+aiosqlite:////app/backend/dynamiccomfy.db
       - JWT_SECRET=change-me-in-production
-      - COMFY_BASE_IMAGE=comfyui-base-image:latest
+      - COMFY_BASE_IMAGE=ghcr.io/ai-dock/comfyui:latest-gpu
       - SERVER_PUBLIC_HOST=127.0.0.1
       - AUTO_KILL_MAX_SECONDS=3600
       - AUTO_KILL_INTERVAL_SECONDS=600
       - PORT_RANGE_START=8101
       - PORT_RANGE_END=8199
-      - SHARED_MODELS_DIR=/app/data/shared_models
-      - USERS_DATA_DIR=/app/data/users
+      - SHARED_MODELS_DIR=${PWD}/data/shared_models
+      - USERS_DATA_DIR=${PWD}/data/users
     restart: unless-stopped

@@ -3,7 +3,7 @@ from pathlib import Path
 import socket
 
 import docker
-from docker.errors import NotFound
+from docker.errors import ImageNotFound, NotFound
 from docker.models.containers import Container
 from docker.types import DeviceRequest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -58,18 +58,29 @@ class DockerManager:
         user_output = self._ensure_user_output_dir(user_id)
         self.settings.shared_models_path.mkdir(parents=True, exist_ok=True)
 
-        return self.client.containers.run(
-            image=self.settings.comfy_base_image,
-            detach=True,
-            ports={"8188/tcp": port},
-            device_requests=[DeviceRequest(count=-1, capabilities=[["gpu"]])],
-            volumes={
-                str(self.settings.shared_models_path): {"bind": "/opt/comfyui/models", "mode": "ro"},
-                str(user_output): {"bind": "/opt/comfyui/output", "mode": "rw"},
-            },
-            labels={"dynamiccomfy.user_id": str(user_id)},
-            name=f"dynamiccomfy-u{user_id}-p{port}",
-        )
+        device_requests = None
+
+        if self.settings.enable_gpu:
+            device_requests = [DeviceRequest(count=-1, capabilities=[["gpu"]])]
+
+        try:
+            return self.client.containers.run(
+                image=self.settings.comfy_base_image,
+                detach=True,
+                ports={"8188/tcp": port},
+                device_requests=device_requests,
+                volumes={
+                    str(self.settings.shared_models_path): {"bind": "/opt/comfyui/models", "mode": "ro"},
+                    str(user_output): {"bind": "/opt/comfyui/output", "mode": "rw"},
+                },
+                labels={"dynamiccomfy.user_id": str(user_id)},
+                name=f"dynamiccomfy-u{user_id}-p{port}",
+            )
+        except ImageNotFound as exc:
+            image = self.settings.comfy_base_image
+            raise RuntimeError(
+                f"Base image '{image}' was not found. Build or pull it first, or update COMFY_BASE_IMAGE."
+            ) from exc
 
     async def start_for_user(self, user: User) -> StartResult:
         existing = await self.instances.get_running_by_user(user.id)

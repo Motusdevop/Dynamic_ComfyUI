@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user, get_db
@@ -15,7 +15,10 @@ async def start_instance(
     db: AsyncSession = Depends(get_db),
 ) -> InstanceControlOut:
     manager = DockerManager(db)
-    result = await manager.start_for_user(user)
+    try:
+        result = await manager.start_for_user(user)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     status, _, _, _ = await manager.status_for_user(user)
     return InstanceControlOut(
         message="Instance ready" if status == "running" else "Instance unavailable",
