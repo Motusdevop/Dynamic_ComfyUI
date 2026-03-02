@@ -12,5 +12,9 @@ data/
 */.mypy_cache/
 */.vscode/
 
+DockerFIlePrev
+dokcer-compose.prev.yml
+docker-compose.prev.yml
+
 
 *.pyc
