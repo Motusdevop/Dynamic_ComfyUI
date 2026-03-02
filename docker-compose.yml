@@ -17,21 +17,11 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES:-1440}
-      - COMFY_BASE_IMAGE=${COMFY_BASE_IMAGE:-dynamiccomfy/comfyui:cuda12.1}
-      - COMFY_INTERNAL_PORT=${COMFY_INTERNAL_PORT:-8188}
-      - COMFY_CONTAINER_MODELS_DIR=${COMFY_CONTAINER_MODELS_DIR:-/opt/ComfyUI/models}
-      - COMFY_CONTAINER_USER_DIR=${COMFY_CONTAINER_USER_DIR:-/opt/ComfyUI/user}
-      - COMFY_CONTAINER_OUTPUT_DIR=${COMFY_CONTAINER_OUTPUT_DIR:-/opt/ComfyUI/output}
-      - COMFY_CONTAINER_TEMP_DIR=${COMFY_CONTAINER_TEMP_DIR:-/opt/ComfyUI/temp}
-      - COMFY_START_TIMEOUT_SECONDS=${COMFY_START_TIMEOUT_SECONDS:-120}
+      - COMFY_BASE_IMAGE=${COMFY_BASE_IMAGE:-comfy-base:latest}
       - ENABLE_GPU=${ENABLE_GPU:-false}
       - SERVER_PUBLIC_HOST=${SERVER_PUBLIC_HOST}
-      - AUTO_KILL_MAX_SECONDS=${AUTO_KILL_MAX_SECONDS:-3600}
-      - AUTO_KILL_INTERVAL_SECONDS=${AUTO_KILL_INTERVAL_SECONDS:-600}
       - PORT_RANGE_START=${PORT_RANGE_START:-8101}
       - PORT_RANGE_END=${PORT_RANGE_END:-8199}
-      - SHARED_MODELS_DIR=/app/data/shared_models
-      - USERS_DATA_DIR=/app/data/users
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)\""]
       interval: 30s

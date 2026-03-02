@@ -5,20 +5,11 @@ from fastapi import FastAPI
 from app.api.routers import auth, instances, models
 from app.infrastructure.database import init_db
 
-from app.services.auth_service import AuthService
-from app.services.auto_kill_service import AutoKillService
-
-auto_kill = AutoKillService()
-
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await init_db()
-    await auto_kill.start()
-    try:
-        yield
-    finally:
-        await auto_kill.stop()
+    yield
 
 
 app = FastAPI(title="DynamicComfy API", lifespan=lifespan)

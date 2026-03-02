@@ -21,9 +21,6 @@ class Settings(BaseSettings):
     enable_gpu: bool = False
     comfy_start_timeout_seconds: int = 120
 
-    auto_kill_max_seconds: int = 3600
-    auto_kill_interval_seconds: int = 600
-
     port_range_start: int = 8101
     port_range_end: int = 8199
 

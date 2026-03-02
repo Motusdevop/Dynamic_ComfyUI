@@ -3,7 +3,7 @@ import docker
 # Подключаемся к локальному Docker-демону
 client = docker.from_env()
 
-IMAGE_NAME = "comfyui-base-image:latest"  # <-- ЗАМЕНИ на имя твоего собранного образа ComfyUI
+IMAGE_NAME = "comfyui-base:latest"  # <-- ЗАМЕНИ на имя твоего собранного образа ComfyUI
 PORT = 8188
 
 print(f"Пытаемся запустить {IMAGE_NAME} на порту {PORT}...")

@@ -14,22 +14,12 @@ set -a
 source .env
 set +a
 
-if [[ -z "${PROJECT_ROOT:-}" ]]; then
-  echo "PROJECT_ROOT is required in .env"
-  exit 1
-fi
-
-if [[ "$(cd "$PROJECT_ROOT" && pwd)" != "$ROOT_DIR" ]]; then
-  echo "PROJECT_ROOT ($PROJECT_ROOT) must point to this repository path ($ROOT_DIR)."
-  exit 1
-fi
-
 if [[ -z "${SERVER_PUBLIC_HOST:-}" ]]; then
   echo "SERVER_PUBLIC_HOST is required in .env"
   exit 1
 fi
 
-mkdir -p "$PROJECT_ROOT/data/shared_models" "$PROJECT_ROOT/data/users"
+mkdir -p "$ROOT_DIR/data"
 
 IMAGE_TAG="${COMFY_BASE_IMAGE:-dynamiccomfy/comfyui:cuda12.1}"
 

@@ -13,7 +13,6 @@ cp .env.example .env
 ```
 
 4. Edit `.env`:
-`PROJECT_ROOT` must equal the absolute server path to this repo.
 `SERVER_PUBLIC_HOST` must be your public IP or domain.
 `JWT_SECRET` must be replaced with a strong random value.
 `ENABLE_GPU=true` only when NVIDIA runtime is configured on the server.
