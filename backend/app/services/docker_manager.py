@@ -35,6 +35,8 @@ class DockerManager:
     def _ensure_user_workspace_dir(self, user_id: int) -> Path:
         workspace = self.settings.users_data_path / str(user_id) / "workspace"
         workspace.mkdir(parents=True, exist_ok=True)
+        # ComfyUI expects these folders under --base-directory at startup.
+        (workspace / "custom_nodes").mkdir(parents=True, exist_ok=True)
         return workspace
 
     def _ensure_user_temp_dir(self, user_id: int) -> Path:
